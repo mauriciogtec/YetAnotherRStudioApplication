@@ -6,4 +6,4 @@ It all starts with a story... Below is the tale behind the code in this reposito
 
 First some enthusiasism while we do a first commit.
 
-<img src="Images/getting_ready.jpg" style="width: 200px;"/>
+![](Images/getting_ready.png)
