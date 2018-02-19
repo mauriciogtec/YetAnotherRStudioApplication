@@ -31,6 +31,11 @@ If you want to install this package and test it in your computer just run
 devtools::install_github('mauriciogtec/YetAnotherRStudioApplication')
 ```
 
+## Configuring continuous integration with Travis and `covr`
+
+To make sure all releases work just fine (especially since Rcpp needs to be built). I will include the file .travis.yml and register this repository. Below are the banners provided. I am excited, `travis_integration` is the frist branch in my code and... it worked! Merging to master.
+
 ---
-[![codecov](https://codecov.io/gh/mauriciogtec/YetAnotherRStudioApplication/branch/master/graph/badge.svg)](htt
+[![Build Status](https://travis-ci.org/mauriciogtec/YetAnotherRStudioApplication.svg?branch=travis_integration)](https://travis-ci.org/mauriciogtec/YetAnotherRStudioApplication)
+[![codecov](https://codecov.io/gh/mauriciogtec/YetAnotherRStudioApplication/branch/travis_integration/graph/badge.svg)](https://codecov.io/gh/mauriciogtec/YetAnotherRStudioApplication)
 ---
