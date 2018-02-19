@@ -33,7 +33,7 @@ devtools::install_github('mauriciogtec/YetAnotherRStudioApplication')
 
 *Note*: All docuemntation will be created with roxygen directives and the function `devtools::document()`. 
 
-## Conficuration of Travis CI and Codecov with `covr` and testthat.
+## Configuration of Travis CI and Codecov with `covr` and testthat.
 
 To make sure all releases work just fine (especially since Rcpp needs to be built). I will include the file .travis.yml and register this repository. Below are the banners provided. I am excited, `travis_integration` is the frist branch in my code and... it worked! Merging to master.
 
