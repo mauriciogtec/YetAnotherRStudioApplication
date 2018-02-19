@@ -30,3 +30,9 @@ If you want to install this package and test it in your computer just run
 ```r
 devtools::install_github('mauriciogtec/YetAnotherRStudioApplication')
 ```
+
+## Configuring continuous integration with Travis and `covr`
+
+To make sure all releases work just fine (especially since Rcpp needs to be built). I will include the file .travisyml and register this repository. Below are the banners provided. 
+
+```
