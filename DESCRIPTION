@@ -3,10 +3,10 @@ Type: Package
 Title: My Application
 Version: 1.0
 Date: 2018-02-18
-Author: Mauricio Garcia Tec
-Maintainer: Mauricio Garcia Tec <mauricio@utexas.edu>
+Authors@R: person("Mauicio", "Garcia Tec", , "mauriciogtec@texas.edum", c("aut", "cre"))
 Description: Shows my approach to package developing
-License: MIT
+License: MIT + file LICENSE
 Imports: Rcpp (>= 0.12.12)
 LinkingTo: Rcpp, RcppArmadillo
 Suggests: covr
+RoxygenNote: 6.0.1
