@@ -46,7 +46,8 @@ To make sure all releases work just fine (especially since Rcpp needs to be buil
 
 Great news! Our first merge!
 
+![](Images/continuous_integration.png)
 
-From now on I won't talk about branch merges. We'll just hope I am working the right way.
+From now on I won't talk about branch merges. We'll just believe I'll continue working the right way.
   
 

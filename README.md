@@ -21,7 +21,7 @@ I have a few ideas!
 * This is yet another application, so let's do this snappy.
 * Oh, by the way, this README is an `rmarkdown`.
 
-## Creating the package
+## Creating the package and setting up continous integration
 
 ![](Images/creating_package.png)
 
@@ -31,11 +31,23 @@ If you want to install this package and test it in your computer just run
 devtools::install_github('mauriciogtec/YetAnotherRStudioApplication')
 ```
 
-## Configuring continuous integration with Travis and `covr`
+*Note*: All docuemntation will be created with roxygen directives and the function `devtools::document()`. 
+
+## Conficuration of Travis CI and Codecov with `covr` and testthat.
 
 To make sure all releases work just fine (especially since Rcpp needs to be built). I will include the file .travis.yml and register this repository. Below are the banners provided. I am excited, `travis_integration` is the frist branch in my code and... it worked! Merging to master.
 
 ---
-[![Build Status](https://travis-ci.org/mauriciogtec/YetAnotherRStudioApplication.svg?branch=travis_integration)](https://travis-ci.org/mauriciogtec/YetAnotherRStudioApplication)
-[![codecov](https://codecov.io/gh/mauriciogtec/YetAnotherRStudioApplication/branch/travis_integration/graph/badge.svg)](https://codecov.io/gh/mauriciogtec/YetAnotherRStudioApplication)
+
+[![Build Status](https://travis-ci.org/mauriciogtec/YetAnotherRStudioApplication.svg?branch=master)](https://travis-ci.org/mauriciogtec/YetAnotherRStudioApplication)
+[![codecov](https://codecov.io/gh/mauriciogtec/YetAnotherRStudioApplication/branch/master/graph/badge.svg)](https://codecov.io/gh/mauriciogtec/YetAnotherRStudioApplication)
+
 ---
+
+Great news! Our first merge!
+
+![](Images/continuous_integration.png)
+
+From now on I won't talk about branch merges. We'll just believe I'll continue working the right way.
+  
+
