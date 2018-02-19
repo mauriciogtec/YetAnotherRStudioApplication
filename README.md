@@ -30,3 +30,7 @@ If you want to install this package and test it in your computer just run
 ```r
 devtools::install_github('mauriciogtec/YetAnotherRStudioApplication')
 ```
+
+---
+[![codecov](https://codecov.io/gh/mauriciogtec/YetAnotherRStudioApplication/branch/master/graph/badge.svg)](htt
+---

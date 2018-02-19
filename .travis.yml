@@ -1,5 +1,27 @@
-r_github_packages:
-  - r-lib/covr
+# Header
+language: r
+sudo: false
+dist: trusty
+cache: packages
+latex: false
 
+matrix:
+  include:
+  - r: oldrel
+  - r: release
+    env:
+    - BUILD_PKGDOWN: true
+  - r: devel
+
+#env
+env:
+  global:
+  - _R_CHECK_FORCE_SUGGESTS_=false
+  - MAKEFLAGS="-j 2"
+  - TRAVIS_CXXFLAGS="-Wall -Wextra -pedantic -Werror"
+
+r_github_packaes:
+  - r-lib/covr
+  
 after_success:
   - Rscript -e 'covr::codecov()'
