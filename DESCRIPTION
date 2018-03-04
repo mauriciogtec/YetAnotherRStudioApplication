@@ -6,7 +6,7 @@ Date: 2018-02-18
 Authors@R: person("Mauicio", "Garcia Tec", , "mauriciogtec@texas.edum", c("aut", "cre"))
 Description: Shows my approach to package developing
 License: MIT + file LICENSE
-Imports: Rcpp (>= 0.12.12)
+Imports: Rcpp (>= 0.12.12), purrr (>= 0.2.3)
 LinkingTo: Rcpp, RcppArmadillo
 Suggests: covr, testthat
 RoxygenNote: 6.0.1
