@@ -68,6 +68,7 @@ library(YetAnotherRStudioApplication) # my functions defined below that come wit
 library(tidyverse)
 library(ggplot2)
 library(gridExtra)
+library(knitr)
 ```
 
 
@@ -205,7 +206,6 @@ plots <- b_coefs %>%
   map(~ ggplot(., aes(x = value)) +
     geom_histogram(bins = 30) +
     geom_vline(xintercept = original_coeffs[.$coef[1]], colour = "red") +
-    facet_grid(coef ~ .) +
     ggtitle(.$coef[1])) 
 marrangeGrob(plots, 3, 2, top = NULL)
 ```
@@ -222,11 +222,12 @@ new_sd <- b_coefs %>%
 Compare result
 ```{r}
 data_frame(
-  `Original estimates` = original_coeffs,
-  `Mean bootstrap estimates` = new_coef,
-  `Original St. Dev.` = original_summary$coefficients[ ,2],
-  `Bootstrap St. Dev.` = new_sd
-)
+  `Original coefs` = original_coeffs,
+  `bootstrap coefs` = new_coef,
+  `Original sd` = original_summary$coefficients[ ,2],
+  `Bootstrap sd` = new_sd
+) %>% 
+  kable()
 ```
 
 If we compare with the original estimates for the mean and standard deviation of the coefficient, they are completely different, especially in `gpa`, where we had our sneaky outlier. This is the main contribution of bootstrap! We have an entire distribution of the estimators, and much better sense of their uncertainty!
@@ -245,6 +246,137 @@ sprintf("The new prediction is %0.2f%%", 100*b_acc)
 
 It's a very modest yet positive improvement over the original model.
 
-## Bootstrapping residuals and C++
+## Bootstrapping residuals for robust regression with Rcpp
 
-Just to finish this presentation. I will show an approach for bootstrapping regression by resampling from the errors. This time I will create a single `rcpp` function to the entire job. Why?
+Just to finish this presentation. I will show an approach for bootstrapping regression by resampling from the errors. This time I will create a single `rcpp` function to do the entire job. There's of course many rooms of improvement, including the resampling schme and need to integrate it the previous framework. But it is a nice ilustration of the power of Rcpp and the bootstrapping method.
+
+```{cpp, eval=FALSE}
+#define ARMA_64BIT_WORD 1
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::plugins(cpp11)]]
+
+using namespace Rcpp;
+using namespace arma;
+using namespace std;
+
+//' @title parametric bootstrap regression
+//' @export
+// [[Rcpp::export]]
+Rcpp::List bootstrap_rlm(
+      arma::mat &X,
+      arma::vec &y,
+      int times
+    ){
+  uword n = X.n_rows;
+  uword p = X.n_cols;
+  uword B = times;
+  
+  // Step 1: Obtain the projection matrix and leverages
+  mat pseudo_inv = pinv(X);
+  mat proj_mat = X * pseudo_inv;
+  vec leverage = proj_mat.diag();
+  
+  // Step 2: Find coefficients and residuals
+  vec coeffs = pseudo_inv * y;
+  vec fitted = X * coeffs;
+  vec err = y - fitted;
+  
+  // Step 3: Modified residuals
+  vec rres = err / sqrt(1 - leverage);
+  vec centered_rres = rres - mean(rres);
+  
+  // Step 4: Resample obtained bootstrapped coefficients
+  mat b_coefs(B, p);
+  vec b_se(B);
+  for (uword i = 0; i < B; i++) {
+    // Sample indices
+    uvec idx(n); 
+    for (uword i = 0; i < n; i++) {
+      idx(i) = rand() % n;  // main area of opportunity for improvement
+    }
+    vec y_i = fitted + centered_rres.elem(idx);
+    // Fit regression
+    vec coefs_i =  pseudo_inv * y_i;
+    b_coefs.row(i) =  coefs_i.t();
+    vec err_i = y_i - X * coefs_i;
+    b_se(i) = sqrt(sum(square(err_i)) / (n - p)) ;
+  }
+
+  return Rcpp::List::create(Named("coefficients") = wrap(b_coefs),
+                            Named("se") = wrap(b_se),
+                            Named("residuals") = wrap(err),
+                            Named("leverages") = wrap(leverage),
+                            Named("modified residuals") = wrap(rres));
+}
+```
+
+Let's see an example with a commin R dataset. We will compare with `rlm` from the `MASS` package.
+
+```{r, message=FALSE, warning=FALSE}
+library(MASS)
+library(tidyverse)
+```
+We want to predict the varible `stackloss` in the following data set
+```{r}
+data("stackloss")
+X <- stackloss %>% 
+  dplyr::select(-stack.loss) %>% 
+  cbind(1, .) %>% 
+  data.matrix()
+y <- stackloss %>% 
+  pull(stack.loss)
+head(stackloss)
+```
+
+```{r}
+mod <- rlm(stack.loss ~ ., data = stackloss)
+summary(mod)
+```
+
+Now with our bootstrap fast function
+
+```{r}
+n_bootstraps <- 500
+system.time({
+  bmod <- bootstrap_rlm(X, y, n_bootstraps)
+})
+```
+
+```{r}
+b_coefs <- bmod$coefficient %>% 
+  as.data.frame()
+names(b_coefs) <- names(mod$coefficients)
+head(b_coefs)
+```
+
+We can now compare the distribution we get from our model with the `rlm` function in `MASS`, which is shown in red.
+
+```{r, warning=FALSE}
+plots <- b_coefs %>% 
+  as.data.frame() %>% 
+  gather("coef", "value") %>% 
+  split(.$coef) %>% 
+  map(~ ggplot(., aes(x = value)) +
+    geom_histogram(bins = 30) +
+    geom_vline(xintercept = mod$coefficients[.$coef[1]], colour = "red") +
+    ggtitle(.$coef[1])) 
+marrangeGrob(plots, 2, 2, top = NULL)
+```
+
+Let's compare mean and errors of the models
+
+```{r}
+b_estimates <- b_coefs %>%
+  colMeans()
+b_sd <- b_coefs %>% 
+  apply(2, sd)
+data_frame(
+  `MASS rlm coefs` = mod$coefficients,
+  `bootstrap coefs` = b_estimates,
+  `MASS rlm sd.` = summary(mod)$coefficients[ ,2],
+  `bootstrap sd` = b_sd
+) %>% 
+  kable()
+```
+

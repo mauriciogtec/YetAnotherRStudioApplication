@@ -24,7 +24,7 @@ Rcpp::List bootstrap_rlm(
   mat proj_mat = X * pseudo_inv;
   vec leverage = proj_mat.diag();
   
-  // Step 2: Find coefficients and robust residuals
+  // Step 2: Find coefficients and residuals
   vec coeffs = pseudo_inv * y;
   vec fitted = X * coeffs;
   vec err = y - fitted;
