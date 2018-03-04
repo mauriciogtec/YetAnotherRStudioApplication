@@ -36,4 +36,3 @@ bootstrap_map <- function(x, .f, times = 50L) {
   .f <- purrr:::as_mapper(.f)
   purrr::map(1:x$times, function(i) .f(x[i]))
 }
-

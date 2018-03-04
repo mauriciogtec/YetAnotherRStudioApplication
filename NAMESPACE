@@ -3,6 +3,7 @@
 S3method("[",bootstrap)
 export(bootstrap)
 export(bootstrap_map)
+export(bootstrap_robust_regression)
 importFrom(Rcpp,evalCpp)
 importFrom(Rcpp,sourceCpp)
 useDynLib(YetAnotherRStudioApplication, .registration = TRUE)

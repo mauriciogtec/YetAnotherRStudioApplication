@@ -58,21 +58,25 @@ Here are my precious banners:
 
 ##  A light bootstrap library
 
+I don't pretend to do anything as powerful as `rsample`. In fact, I wanna show my elementary approach to bootstrapping with a very simple example. Thanks to the `tidyverse` machinery we can hove something up and running in no time.
+
+I'll use the following libraries
+
 
 ```{r, message=FALSE, warning=FALSE}
-library(YetAnotherRStudioApplication)
+library(YetAnotherRStudioApplication) # my functions defined below that come with this package
 library(tidyverse)
 library(ggplot2)
 library(gridExtra)
 ```
 
 
-The light-weight library comprises three basic R functions
-- *constructor*: creates a bootstrap resample by sampling only the indices
+The light-weight example library will have three basic R functions
+- *constructor*: creates a bootstrap resample by resampling indices with replacement
 - *indexing*: defines a bracket notation to simplify indexing
-- *mapping*: applies a function to each resample. It is using the power of `purrr` (with some code piracy) and it is already somewhat powerful
+- *mapping*: applies a function to each resample. It is exploiting the power of `purrr` to make it versatile. Here they are
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 #' @title light bootstrap constructor
 #' @description creates resampling indices but does not make entire copies of the dataset
 #' @param d a data.frame, tibble or matrix 
@@ -106,14 +110,16 @@ bootstrap <- function(data, times = 50L) {
 bootstrap_map <- function(x, .f, times = 50L) {
   # Validate input
   !inherits(x, c("bootstrap")) && stop("x must be of class bootstrap")
-  !inherits(.f, c("function")) && stop("FUN must be a function")
+  !inherits(.f, c("function", "formula")) && stop(".f must be a function or formula")
   # Create samples for the most basic bootstrap scheme
   .f <- purrr:::as_mapper(.f)
   purrr::map(1:x$times, function(i) .f(x[i]))
 }
+
 ```
 
-Our example data looks like this
+Now let's take a look at the example data I will use. Our task is to predict the admittance of a student into a UCLA program, based on their application features. We will use a logistic regression to exemplify the bootstrap approach, which in this case will be naive and resample the cases.
+
 ```{r, message=FALSE, warning=FALSE}
 data <- read_csv("https://stats.idre.ucla.edu/stat/data/binary.csv") %>% 
   mutate(admit = factor(admit)) %>% 
@@ -121,14 +127,15 @@ data <- read_csv("https://stats.idre.ucla.edu/stat/data/binary.csv") %>%
 head(data)
 ```
 
-We'll be interested in predicting admittance into a UCLA program using a logistic regression with bootstrap. The following scatter diagram shows that there seems to be an association between higher GREs and acceptance. The effect of the GPA is less clear (ggplot makes it easy to compare by fixing the axis limits).
+The following scatter diagram shows that there seems to be an association between higher gre's and acceptance. The effect of the GPA is less clear to me (we notice how `ggplot` makes it easy to compare by fixing the plotting limits accross subplots: `ggplot` is great!).
 
 ```{r}
 ggplot(data, aes(x = gre, y = gpa)) +
   geom_point() +
   facet_grid(admit ~ rank, labeller = labeller(rank = function(i) paste0("rank", i)))
 ```
-Now what I'm gonna do is *mess badly with my data* by introducing an outlier. We want to see how the bootstrap will be stand superior to the simple model.
+
+Now what I'm gonna do is ***cheat and create a bad mess*** by introducing an outlier. We want to see how the bootstrap will be stand superior to the simple model.
 ```{r}
 data$gpa[1] <- 40.0
 ```
@@ -139,7 +146,8 @@ Of course we want to use bootstrap, but let us quickly first show the results of
 ```{r}
 mod <- glm(admit ~ ., data = data, family = "binomial")
 original_coeffs <- coefficients(mod)
-summary(mod)
+original_summary <- summary(mod)
+original_coeffs
 ```
 
 Prediction accuracy
@@ -148,24 +156,29 @@ pred <- round(fitted.values(mod, data))
 sprintf("Original model accuracy is %0.2f%%", 100*sum(pred == data$admit) / nrow(data))
 ```
 
-We'll now show an example of crude bootstrap regression prediction with our  (later we see a parametric bootstrap more efficient version). 
+We'll now *create our bootstrap samples*!!
 
 ```{r}
 set.seed(999)
+times <- 1000L
 system.time({
-  b_data <- bootstrap(data, times = 500L)
+  b_resamples <- bootstrap(data, times)
 })
 ```
-Evidently, the new object doesn't grow in size proportionally to the number of resamples, since only a row indices are being created. For 500 resamples, the growth factor in this dataset is
+
+Evidently, the new object doesn't grow in size proportionally to the number of resamples, since only a indices are being created. For `r times` resamples, the growth factor in this dataset is
 
 ```{r}
-as.numeric(object.size(b_data) / object.size(data))
+as.numeric(object.size(b_resamples) / object.size(data))
 ```
 
-We now want to obtain to apply the regression to each bootstrap sample (here we are using `purrr`'s formula approach to defining functions)
+Let's now run a regression model for each resample:
+
 ```{r}
 system.time({
-  b_models <- bootstrap_map(b_data, ~glm(admit ~ ., data = .x, family = "binomial"))
+  b_models <- bootstrap_map(b_resamples, 
+    ~glm(admit ~ ., data = .x, family = "binomial")
+  )
 })
 ```
  
@@ -179,10 +192,10 @@ b_coefs <- b_models %>%
 
 ```{r}
 b_coefs %>% 
-  apply(2, mean)
+  colMeans()
 ```
 
-The following plot shows the value of the coefficients for each bootstrap resample, and in red the original estimate.
+The following plot shows the value of the coefficients for each bootstrap resample; the red vertical lines are the original estimates.
 
 ```{r, warning=FALSE}
 plots <- b_coefs %>% 
@@ -194,37 +207,44 @@ plots <- b_coefs %>%
     geom_vline(xintercept = original_coeffs[.$coef[1]], colour = "red") +
     facet_grid(coef ~ .) +
     ggtitle(.$coef[1])) 
-marrangeGrob(plots, 3, 2)
+marrangeGrob(plots, 3, 2, top = NULL)
 ```
 
 We can obtained improved model estimates and standard errors, comparing the original estimates (note: the original estimates given by the summary are in fact an approximation based on the model assumptions--the bootstrap version is not)
 
-Mean values
 ```{r}
-b_coefs %>% 
-  apply(2, mean)
-```
-Standard deviation
-```{r}
-b_coefs %>% 
+new_coef <- b_coefs %>% 
+  colMeans()
+new_sd <- b_coefs %>% 
   apply(2, sd)
 ```
 
-If we compare with the original estimates for the mean and standard deviation of the coefficient, they were completely different. 
+Compare result
+```{r}
+data_frame(
+  `Original estimates` = original_coeffs,
+  `Mean bootstrap estimates` = new_coef,
+  `Original St. Dev.` = original_summary$coefficients[ ,2],
+  `Bootstrap St. Dev.` = new_sd
+)
+```
 
-Let's now compare predictions. We'll bootstrap the predictions for each individual, and the take a final decision by averaging every model separately.
+If we compare with the original estimates for the mean and standard deviation of the coefficient, they are completely different, especially in `gpa`, where we had our sneaky outlier. This is the main contribution of bootstrap! We have an entire distribution of the estimators, and much better sense of their uncertainty!
+
+Let's now compare predictions by selecting the prediction for each individual in each bootstrapped model. The final final decision is taken by averaging.
 
 ```{r}
 b_pred <- b_models %>% 
   map(~ predict(., data, type = "response")) %>% 
   reduce(rbind) %>% 
-  apply(2, mean) %>% 
+  colMeans() %>% 
   map_dbl(round)
 b_acc <- sum(b_pred == data$admit) / nrow(data)
 sprintf("The new prediction is %0.2f%%", 100*b_acc)
 ```
 
-It's not the best improvement because both models weren't very good in the first place. But it was an improvement. With more complicated models there should be a bigger diference.
-
+It's a very modest yet positive improvement over the original model.
 
 ## Bootstrapping residuals and C++
+
+Just to finish this presentation. I will show an approach for bootstrapping regression by resampling from the errors. This time I will create a single `rcpp` function to the entire job. Why?

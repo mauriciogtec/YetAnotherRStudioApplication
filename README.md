@@ -58,64 +58,73 @@ Here are my precious banners:
 
 ##  A light bootstrap library
 
+I don't pretend to do anything as powerful as `rsample`. In fact, I wanna show my elementary approach to bootstrapping with a very simple example. Thanks to the `tidyverse` machinery we can hove something up and running in no time.
+
+I'll use the following libraries
+
 
 
 ```r
-library(YetAnotherRStudioApplication)
+library(YetAnotherRStudioApplication) # my functions defined below that come with this package
 library(tidyverse)
 library(ggplot2)
 library(gridExtra)
 ```
 
 
-The light-weight library comprises three basic R functions
-- *constructor*: creates a bootstrap resample by sampling only the indices
+The light-weight example library will have three basic R functions
+- *constructor*: creates a bootstrap resample by resampling indices with replacement
 - *indexing*: defines a bracket notation to simplify indexing
-- *mapping*: applies a function to each resample. It is using the power of `purrr` (with some code piracy) and it is already somewhat powerful
+- *mapping*: applies a function to each resample. It is exploiting the power of `purrr` to make it versatile. Here they are
 
 
 ```r
-#' @title light bootstrap constructor
-#' @description creates resampling indices but does not make entire copies of the dataset
-#' @param d a data.frame, tibble or matrix 
-#' @export
-bootstrap <- function(data, times = 50L) {
-  # Validate input
-  !inherits(data, c("data.frame", "matrix")) && stop("d must be a data frame or numeric matrix")
-  # Create samples for the most basic bootstrap scheme
-  idx <- replicate(times, sample(nrow(data), replace = TRUE), simplify = FALSE)
-  names(idx) <- paste0("sample", 1:times)
-  # Output boot_light object
-  # new("bootstrap_light", data = data, indices = idx, times = as.integer(times))
-  x <- list(data = data, idx = idx, times = as.integer(times))
-  class(x) <- c("bootstrap")
-  x
-}
-
-#' @title boot light indexing
-#' @description simplifies accessing a bootstrap resample
-#' @details use `x[i]` to access the i-th resample
-#' @rdname bootstrap
-#' @export
-`[.bootstrap` <- function(x, i) x$data[x$idx[[i]], ]
-
-
-#' @title Apply a function to each entrie of bootstrap
-#' @description creates resampling indices but does not make entire copies of the dataset
-#' @param x a bootstrap_light object
-#' @param .f function to apply to x, can be formula, see the map in the purrr package for details
-#' @export
-bootstrap_map <- function(x, .f, times = 50L) {
-  # Validate input
-  !inherits(x, c("bootstrap")) && stop("x must be of class bootstrap")
-  !inherits(.f, c("function")) && stop("FUN must be a function")
-  # Create samples for the most basic bootstrap scheme
-  .f <- purrr:::as_mapper(.f)
-  purrr::map(1:x$times, function(i) .f(x[i]))
-}
+cat(readLines('R/bootstrap.R'), sep = '\n')
 ```
 
-Our example data looks like this
+```
+## #' @title light bootstrap constructor
+## #' @description creates resampling indices but does not make entire copies of the dataset
+## #' @param d a data.frame, tibble or matrix 
+## #' @export
+## bootstrap <- function(data, times = 50L) {
+##   # Validate input
+##   !inherits(data, c("data.frame", "matrix")) && stop("d must be a data frame or numeric matrix")
+##   # Create samples for the most basic bootstrap scheme
+##   idx <- replicate(times, sample(nrow(data), replace = TRUE), simplify = FALSE)
+##   names(idx) <- paste0("sample", 1:times)
+##   # Output boot_light object
+##   # new("bootstrap_light", data = data, indices = idx, times = as.integer(times))
+##   x <- list(data = data, idx = idx, times = as.integer(times))
+##   class(x) <- c("bootstrap")
+##   x
+## }
+## 
+## #' @title boot light indexing
+## #' @description simplifies accessing a bootstrap resample
+## #' @details use `x[i]` to access the i-th resample
+## #' @rdname bootstrap
+## #' @export
+## `[.bootstrap` <- function(x, i) x$data[x$idx[[i]], ]
+## 
+## 
+## #' @title Apply a function to each entrie of bootstrap
+## #' @description creates resampling indices but does not make entire copies of the dataset
+## #' @param x a bootstrap_light object
+## #' @param .f function to apply to x, can be formula, see the map in the purrr package for details
+## #' @export
+## bootstrap_map <- function(x, .f, times = 50L) {
+##   # Validate input
+##   !inherits(x, c("bootstrap")) && stop("x must be of class bootstrap")
+##   !inherits(.f, c("function", "formula")) && stop(".f must be a function or formula")
+##   # Create samples for the most basic bootstrap scheme
+##   .f <- purrr:::as_mapper(.f)
+##   purrr::map(1:x$times, function(i) .f(x[i]))
+## }
+```
+
+Now let's take a look at the example data I will use. Our task is to predict the admittance of a student into a UCLA program, based on their application features. We will use a logistic regression to exemplify the bootstrap approach, which in this case will be naive and resample the cases.
+
 
 ```r
 data <- read_csv("https://stats.idre.ucla.edu/stat/data/binary.csv") %>% 
@@ -136,7 +145,7 @@ head(data)
 ## 6      1   760  3.00      2
 ```
 
-We'll be interested in predicting admittance into a UCLA program using a logistic regression with bootstrap. The following scatter diagram shows that there seems to be an association between higher GREs and acceptance. The effect of the GPA is less clear (ggplot makes it easy to compare by fixing the axis limits).
+The following scatter diagram shows that there seems to be an association between higher gre's and acceptance. The effect of the GPA is less clear to me (we notice how `ggplot` makes it easy to compare by fixing the plotting limits accross subplots: `ggplot` is great!).
 
 
 ```r
@@ -146,7 +155,8 @@ ggplot(data, aes(x = gre, y = gpa)) +
 ```
 
 ![](README_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
-Now what I'm gonna do is *mess badly with my data* by introducing an outlier. We want to see how the bootstrap will be stand superior to the simple model.
+
+Now what I'm gonna do is *cheat and create a bad mess* by introducing an outlier. We want to see how the bootstrap will be stand superior to the simple model.
 
 ```r
 data$gpa[1] <- 40.0
@@ -207,37 +217,40 @@ We'll now show an example of crude bootstrap regression prediction with our  (la
 
 ```r
 set.seed(999)
+times <- 1000L
 system.time({
-  b_data <- bootstrap(data, times = 500L)
+  b_resamples <- bootstrap(data, times)
 })
 ```
 
 ```
 ##    user  system elapsed 
-##       0       0       0
+##    0.01    0.00    0.01
 ```
-Evidently, the new object doesn't grow in size proportionally to the number of resamples, since only a row indices are being created. For 500 resamples, the growth factor in this dataset is
+Evidently, the new object doesn't grow in size proportionally to the number of resamples, since only a row indices are being created. For 1000 resamples, the growth factor in this dataset is
 
 
 ```r
-as.numeric(object.size(b_data) / object.size(data))
+as.numeric(object.size(b_resamples) / object.size(data))
 ```
 
 ```
-## [1] 85.32913
+## [1] 169.5811
 ```
 
 We now want to obtain to apply the regression to each bootstrap sample (here we are using `purrr`'s formula approach to defining functions)
 
 ```r
 system.time({
-  b_models <- bootstrap_map(b_data, ~glm(admit ~ ., data = .x, family = "binomial"))
+  b_models <- bootstrap_map(b_resamples, 
+    ~glm(admit ~ ., data = .x, family = "binomial")
+  )
 })
 ```
 
 ```
 ##    user  system elapsed 
-##    2.35    0.02    2.38
+##    4.56    0.02    4.62
 ```
  
 Let's start by comparing the coefficients of the model. We can use `purrr::map` and `purrr::reduce` to collect the bootstraps.
@@ -256,8 +269,10 @@ b_coefs %>%
 ```
 
 ```
-## (Intercept)         gre         gpa       rank2       rank3       rank4 
-## -2.63094444  0.00299234  0.28086952 -0.70274370 -1.32650436 -1.63605475
+##  (Intercept)          gre          gpa        rank2        rank3 
+## -2.707795980  0.002936329  0.312005616 -0.703583790 -1.322967905 
+##        rank4 
+## -1.616685610
 ```
 
 The following plot shows the value of the coefficients for each bootstrap resample, and in red the original estimate.
@@ -273,7 +288,7 @@ plots <- b_coefs %>%
     geom_vline(xintercept = original_coeffs[.$coef[1]], colour = "red") +
     facet_grid(coef ~ .) +
     ggtitle(.$coef[1])) 
-marrangeGrob(plots, 3, 2)
+marrangeGrob(plots, 3, 2, top = NULL)
 ```
 
 ![](README_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
@@ -284,12 +299,14 @@ Mean values
 
 ```r
 b_coefs %>% 
-  apply(2, mean)
+  colMeans()
 ```
 
 ```
-## (Intercept)         gre         gpa       rank2       rank3       rank4 
-## -2.63094444  0.00299234  0.28086952 -0.70274370 -1.32650436 -1.63605475
+##  (Intercept)          gre          gpa        rank2        rank3 
+## -2.707795980  0.002936329  0.312005616 -0.703583790 -1.322967905 
+##        rank4 
+## -1.616685610
 ```
 Standard deviation
 
@@ -300,7 +317,7 @@ b_coefs %>%
 
 ```
 ## (Intercept)         gre         gpa       rank2       rank3       rank4 
-## 1.336811050 0.001231083 0.445644529 0.320265131 0.347078333 0.428003035
+## 1.363015529 0.001205232 0.455348135 0.327269346 0.352229592 0.444447026
 ```
 
 If we compare with the original estimates for the mean and standard deviation of the coefficient, they were completely different. 
@@ -312,16 +329,17 @@ Let's now compare predictions. We'll bootstrap the predictions for each individu
 b_pred <- b_models %>% 
   map(~ predict(., data, type = "response")) %>% 
   reduce(rbind) %>% 
-  apply(2, mean) %>% 
+  colMeans() %>% 
   map_dbl(round)
 b_acc <- sum(b_pred == data$admit) / nrow(data)
 sprintf("The new prediction is %0.2f%%", 100*b_acc)
 ```
 
 ```
-## [1] "The new prediction is 70.25%"
+## [1] "The new prediction is 70.50%"
 ```
 
 It's not the best improvement because both models weren't very good in the first place. But it was an improvement. With more complicated models there should be a bigger diference.
 
 
+## Bootstrapping residuals and C++
