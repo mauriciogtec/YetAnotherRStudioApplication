@@ -226,8 +226,7 @@ data_frame(
   `bootstrap coefs` = new_coef,
   `Original sd` = original_summary$coefficients[ ,2],
   `Bootstrap sd` = new_sd
-) %>% 
-  kable()
+)
 ```
 
 If we compare with the original estimates for the mean and standard deviation of the coefficient, they are completely different, especially in `gpa`, where we had our sneaky outlier. This is the main contribution of bootstrap! We have an entire distribution of the estimators, and much better sense of their uncertainty!
@@ -376,7 +375,6 @@ data_frame(
   `bootstrap coefs` = b_estimates,
   `MASS rlm sd.` = summary(mod)$coefficients[ ,2],
   `bootstrap sd` = b_sd
-) %>% 
-  kable()
+)
 ```
 

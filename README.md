@@ -201,7 +201,7 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##       0       0       0
+##    0.02    0.00    0.02
 ```
 
 Evidently, the new object doesn't grow in size proportionally to the number of resamples, since only a indices are being created. For 1000 resamples, the growth factor in this dataset is
@@ -228,7 +228,7 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##    4.31    0.05    4.36
+##    4.30    0.02    4.33
 ```
  
 Let's start by comparing the coefficients of the model. We can use `purrr::map` and `purrr::reduce` to collect the bootstraps.
@@ -288,20 +288,20 @@ data_frame(
   `bootstrap coefs` = new_coef,
   `Original sd` = original_summary$coefficients[ ,2],
   `Bootstrap sd` = new_sd
-) %>% 
-  kable()
+)
 ```
 
-
-
- Original coefs   bootstrap coefs   Original sd   Bootstrap sd
----------------  ----------------  ------------  -------------
-     -1.8489058        -2.7077960     0.7119777      1.3630155
-      0.0032223         0.0029363     0.0010188      0.0012052
-      0.0137717         0.3120056     0.0666459      0.4553481
-     -0.7206771        -0.7035838     0.3131267      0.3272693
-     -1.2949471        -1.3229679     0.3414103      0.3522296
-     -1.6005765        -1.6166856     0.4150435      0.4444470
+```
+## # A tibble: 6 x 4
+##   `Original coefs` `bootstrap coefs` `Original sd` `Bootstrap sd`
+##              <dbl>             <dbl>         <dbl>          <dbl>
+## 1     -1.848905784      -2.707795980   0.711977670    1.363015529
+## 2      0.003222303       0.002936329   0.001018785    0.001205232
+## 3      0.013771710       0.312005616   0.066645870    0.455348135
+## 4     -0.720677098      -0.703583790   0.313126742    0.327269346
+## 5     -1.294947112      -1.322967905   0.341410321    0.352229592
+## 6     -1.600576455      -1.616685610   0.415043455    0.444447026
+```
 
 If we compare with the original estimates for the mean and standard deviation of the coefficient, they are completely different, especially in `gpa`, where we had our sneaky outlier. This is the main contribution of bootstrap! We have an entire distribution of the estimators, and much better sense of their uncertainty!
 
@@ -356,7 +356,7 @@ Rcpp::List bootstrap_rlm(
   mat proj_mat = X * pseudo_inv;
   vec leverage = proj_mat.diag();
   
-  // Step 2: Find coefficients and robust residuals
+  // Step 2: Find coefficients and residuals
   vec coeffs = pseudo_inv * y;
   vec fitted = X * coeffs;
   vec err = y - fitted;
@@ -468,12 +468,12 @@ head(b_coefs)
 
 ```
 ##   (Intercept)  Air.Flow Water.Temp  Acid.Conc.
-## 1   -37.50070 0.5968135  1.2624080 -0.07971442
-## 2   -31.09271 0.6124507  1.5157649 -0.23778420
-## 3   -49.57264 0.8586416  0.9760800 -0.05443508
-## 4   -37.83825 0.7074117  1.0662287 -0.12108659
-## 5   -40.04078 0.7637483  0.8980218 -0.07024551
-## 6   -14.18202 0.7968815  1.6244003 -0.58311938
+## 1   -24.44819 0.7375493  0.7495571 -0.21175602
+## 2   -41.84243 0.6908591  1.1156701 -0.07819247
+## 3   -28.48329 0.5902179  1.7330503 -0.29060013
+## 4   -28.67865 0.7924143  1.5951254 -0.41331084
+## 5   -56.67033 0.6224599  1.6812031  0.02500631
+## 6   -38.44470 0.6848814  1.5815338 -0.22045073
 ```
 
 We can now compare the distribution we get from our model with the `rlm` function in `MASS`, which is shown in red.
@@ -506,16 +506,16 @@ data_frame(
   `bootstrap coefs` = b_estimates,
   `MASS rlm sd.` = summary(mod)$coefficients[ ,2],
   `bootstrap sd` = b_sd
-) %>% 
-  kable()
+)
 ```
 
-
-
- MASS rlm coefs   bootstrap coefs   MASS rlm sd.   bootstrap sd
----------------  ----------------  -------------  -------------
-    -41.0265311       -40.8145182      9.8073472     12.2931804
-      0.8293739         0.7032308      0.1111803      0.1399549
-      0.9261082         1.3288288      0.3034081      0.3691765
-     -0.1278492        -0.1414518      0.1288526      0.1615458
+```
+## # A tibble: 4 x 4
+##   `MASS rlm coefs` `bootstrap coefs` `MASS rlm sd.` `bootstrap sd`
+##              <dbl>             <dbl>          <dbl>          <dbl>
+## 1      -41.0265311       -39.8961064      9.8073472     11.1692938
+## 2        0.8293739         0.6966468      0.1111803      0.1381313
+## 3        0.9261082         1.3324419      0.3034081      0.3816058
+## 4       -0.1278492        -0.1480145      0.1288526      0.1536385
+```
 
