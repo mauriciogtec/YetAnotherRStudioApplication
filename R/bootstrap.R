@@ -15,17 +15,12 @@ bootstrap <- function(data, times = 50L) {
   x
 }
 
-x #' @title boot light indexing
-#' @description bootstrap_light objects can be accessed as 3d arrays
-#' @details `x[r, i, k]`
-#' @rdname bootstrap_indexing
+#' @title boot light indexing
+#' @description simplifies accessing a bootstrap resample
+#' @details use `x[i]` to access the i-th resample
+#' @rdname bootstrap
 #' @export
-# setClass("bootstrap_light",
-#   slots = list(data = "data.frame", indices = "list", times = "integer"))
-# setMethod(`[`, "bootstrap_light", function(x, i) {x@data[x@indices[[i]], , drop = FALSE]})
-`[.bootstrap_light` <- function(x, r, i, j) x$data[x$idx[[r]], ][i, j]
-# head.bootstrap_light <- function(x, n = 6L) head(x$data, n)
-# tail.bootstrap_light <- function(x, n = 6L) tail(x$data, n)
+`[.bootstrap` <- function(x, i) x$data[x$idx[[i]], ]
 
 
 #' @title Apply a function to each entrie of bootstrap
@@ -36,7 +31,7 @@ x #' @title boot light indexing
 bootstrap_map <- function(x, .f, times = 50L) {
   # Validate input
   !inherits(x, c("bootstrap")) && stop("x must be of class bootstrap")
-  !inherits(FUN, c("function")) && stop("FUN must be a function")
+  !inherits(.f, c("function", "formula")) && stop(".f must be a function or formula")
   # Create samples for the most basic bootstrap scheme
   .f <- purrr:::as_mapper(.f)
   purrr::map(1:x$times, function(i) .f(x[i]))

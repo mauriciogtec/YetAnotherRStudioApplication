@@ -7,7 +7,8 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-
+// // [Rcpp::export]
+// bootstrap_index
 // //' @title resample with replacement
 // //' @description Provides the most basic scheme of bootstramp resample with replacement
 // // [Rcpp::export]
