@@ -10,12 +10,14 @@ using namespace std;
 //' @title parametric bootstrap regression
 //' @export
 // [[Rcpp::export]]
-Rcpp::List bootstrap_robust_regression(
+Rcpp::List bootstrap_rlm(
       arma::mat &X,
       arma::vec &y,
       int times
     ){
-  uword n = X.n_rows, p = X.n_cols, B = times;
+  uword n = X.n_rows;
+  uword p = X.n_cols;
+  uword B = times;
   
   // Step 1: Obtain the projection matrix and leverages
   mat pseudo_inv = pinv(X);

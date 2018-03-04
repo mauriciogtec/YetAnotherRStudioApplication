@@ -6,22 +6,22 @@
 
 using namespace Rcpp;
 
-// bootstrap_robust_regression
-Rcpp::List bootstrap_robust_regression(arma::mat& X, arma::vec& y, int times);
-RcppExport SEXP _YetAnotherRStudioApplication_bootstrap_robust_regression(SEXP XSEXP, SEXP ySEXP, SEXP timesSEXP) {
+// bootstrap_rlm
+Rcpp::List bootstrap_rlm(arma::mat& X, arma::vec& y, int times);
+RcppExport SEXP _YetAnotherRStudioApplication_bootstrap_rlm(SEXP XSEXP, SEXP ySEXP, SEXP timesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat& >::type X(XSEXP);
     Rcpp::traits::input_parameter< arma::vec& >::type y(ySEXP);
     Rcpp::traits::input_parameter< int >::type times(timesSEXP);
-    rcpp_result_gen = Rcpp::wrap(bootstrap_robust_regression(X, y, times));
+    rcpp_result_gen = Rcpp::wrap(bootstrap_rlm(X, y, times));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_YetAnotherRStudioApplication_bootstrap_robust_regression", (DL_FUNC) &_YetAnotherRStudioApplication_bootstrap_robust_regression, 3},
+    {"_YetAnotherRStudioApplication_bootstrap_rlm", (DL_FUNC) &_YetAnotherRStudioApplication_bootstrap_rlm, 3},
     {NULL, NULL, 0}
 };
 

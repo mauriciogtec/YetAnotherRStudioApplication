@@ -3,7 +3,7 @@
 
 #' @title parametric bootstrap regression
 #' @export
-bootstrap_robust_regression <- function(X, y, times) {
-    .Call(`_YetAnotherRStudioApplication_bootstrap_robust_regression`, X, y, times)
+bootstrap_rlm <- function(X, y, times) {
+    .Call(`_YetAnotherRStudioApplication_bootstrap_rlm`, X, y, times)
 }
 
