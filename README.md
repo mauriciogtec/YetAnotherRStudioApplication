@@ -17,13 +17,13 @@ I prepared this special repository instead of a cover letter; I hope you like it
 
 ## Index
 
-1. [Ideas][A few ideas for this repository...]
-2. [Travis CI, unit testing, and Codecov][Setting-up Travis CI, unit testing, and Codecov]
-3. [A light library for bootstrapping][A light library for bootstrapping]
-4. [Case study: UCLA admittance][A case study: UCLA admittance]
-5. [Robust bootstrap regression with Rcpp][Bootstrapping residuals: robust regression with Rcpp]
-6. [Case study: stackloss][Case study: stackloss]
-7. [Test files][Test files]
+1. [Ideas](#a-few-ideas-for-this-repository)
+2. [Travis CI, unit testing, and Codecov](#setting-up-travis-ci-unit-testing-and-codecov)
+3. [A light library for bootstrapping](##a-light-library-for-bootstrapping)
+4. [Case study: UCLA admittance](#a-case-study-ucla-admittance)
+5. [Robust bootstrap regression with Rcpp](#bootstrapping-residuals-robust-regression-with-rcpp)
+6. [Case study: stackloss](#case-study-stackloss)
+7. [Test files](#test-files)
 
 -----
 
@@ -50,7 +50,7 @@ devtools::install_github('mauriciogtec/YetAnotherRStudioApplication')
 
 Let's get started!
 
-[Back to index][Index]
+[Back to index](#index)
 
 ### Setting-up Travis CI, unit testing, and Codecov
 
@@ -68,7 +68,7 @@ My precious:
 ![](Images/uphere.jpg)
 
 
-[Back to index][Index]
+[Back to index](#index)
 
 ###  A light library for bootstrapping
 
@@ -140,7 +140,7 @@ bootstrap_map <- function(x, .f, times = 50L) {
 }
 ```
 
-[Back to index][Index]
+[Back to index](#index)
 
 ### A case study: UCLA admittance
 
@@ -227,7 +227,7 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##    0.03    0.00    0.03
+##    0.02    0.00    0.02
 ```
 
 Evidently, the new object doesn't grow in size proportionally to the number of resamples, since only indices are being stored. For our 1000 resamples, the growth factor in size for the bootsrapped dataset is
@@ -254,7 +254,7 @@ b_models <- bootstrap_map(b_resamples,
 
 ```
 ##    user  system elapsed 
-##    4.39    0.06    4.45
+##    4.20    0.02    4.24
 ```
  
 Super fast, at least for this toy example. Let's now comparr the coefficients of the single model and the bootstrapped one. We can use `purrr::map` and `purrr::reduce` to collect the bootstraps estimates.
@@ -349,7 +349,7 @@ sprintf("The new prediction is %0.2f%%", 100*b_acc)
 
 We see a modest but positive improvement over the original model.
 
-[Back to index][Index]
+[Back to index](#index)
 
 ## Bootstrapping residuals: robust regression with Rcpp
 
@@ -420,7 +420,7 @@ Rcpp::List bootstrap_rlm(
 ```
 
 
-[Back to index][Index]
+[Back to index](#index)
 
 ### Case study: stackloss
 
@@ -507,12 +507,12 @@ head(b_coefs)
 
 ```
 ##   (Intercept)  Air.Flow Water.Temp  Acid.Conc.
-## 1   -39.99730 0.8247604  1.4404729 -0.28103618
-## 2   -28.14672 0.6227701  2.0578232 -0.39736530
-## 3   -20.95254 0.8987623  1.0829062 -0.44187797
-## 4   -45.20598 0.7734870  0.8250585 -0.02500840
-## 5   -39.39274 0.7037804  1.2961675 -0.14372254
-## 6   -47.12738 0.6495056  1.4774469 -0.08120211
+## 1   -51.75230 0.5915101   1.774675 -0.04907255
+## 2   -62.98293 0.7781718   1.167115  0.10105416
+## 3   -37.53804 0.6955403   1.299098 -0.17379812
+## 4   -66.52950 0.7701869   1.196422  0.15486187
+## 5   -67.86527 0.7117448   1.420694  0.14018912
+## 6   -38.70231 0.6708130   1.659460 -0.20101446
 ```
 
 Let's now compare results. We show a histogram of our resamples and the `rlm`'s estimates with red lines.
@@ -551,15 +551,15 @@ data_frame(
 ## # A tibble: 4 x 4
 ##   `MASS rlm coefs` `bootstrap coefs` `MASS rlm sd.` `bootstrap sd`
 ##              <dbl>             <dbl>          <dbl>          <dbl>
-## 1      -41.0265311       -40.1647615      9.8073472     12.2524227
-## 2        0.8293739         0.7175581      0.1111803      0.1378854
-## 3        0.9261082         1.2841564      0.3034081      0.3695472
-## 4       -0.1278492        -0.1479626      0.1288526      0.1553305
+## 1      -41.0265311       -39.8686725      9.8073472     12.1195915
+## 2        0.8293739         0.7107926      0.1111803      0.1390344
+## 3        0.9261082         1.3035074      0.3034081      0.3749820
+## 4       -0.1278492        -0.1514588      0.1288526      0.1572396
 ```
 
 The results are indeed pretty similar! We get somewhat wider standard errors, but in the same order of magnitude. 
 
-[Back to index][Index]
+[Back to index](#index)
 
 ### Test files
 
@@ -583,4 +583,4 @@ test_that("rlm", {
 ```
 
 
-[Back to index][Index]
+[Back to index](#index)

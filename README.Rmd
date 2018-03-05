@@ -17,13 +17,13 @@ I prepared this special repository instead of a cover letter; I hope you like it
 
 ## Index
 
-1. [Ideas][A few ideas for this repository...]
-2. [Travis CI, unit testing, and Codecov][Setting-up Travis CI, unit testing, and Codecov]
-3. [A light library for bootstrapping][A light library for bootstrapping]
-4. [Case study: UCLA admittance][A case study: UCLA admittance]
-5. [Robust bootstrap regression with Rcpp][Bootstrapping residuals: robust regression with Rcpp]
-6. [Case study: stackloss][Case study: stackloss]
-7. [Test files][Test files]
+1. [Ideas](#a-few-ideas-for-this-repository)
+2. [Travis CI, unit testing, and Codecov](#setting-up-travis-ci-unit-testing-and-codecov)
+3. [A light library for bootstrapping](##a-light-library-for-bootstrapping)
+4. [Case study: UCLA admittance](#a-case-study-ucla-admittance)
+5. [Robust bootstrap regression with Rcpp](#bootstrapping-residuals-robust-regression-with-rcpp)
+6. [Case study: stackloss](#case-study-stackloss)
+7. [Test files](#test-files)
 
 -----
 
@@ -50,7 +50,7 @@ devtools::install_github('mauriciogtec/YetAnotherRStudioApplication')
 
 Let's get started!
 
-[Back to index][Index]
+[Back to index](#index)
 
 ### Setting-up Travis CI, unit testing, and Codecov
 
@@ -68,7 +68,7 @@ My precious:
 ![](Images/uphere.jpg)
 
 
-[Back to index][Index]
+[Back to index](#index)
 
 ###  A light library for bootstrapping
 
@@ -138,7 +138,7 @@ bootstrap_map <- function(x, .f, times = 50L) {
 }
 ```
 
-[Back to index][Index]
+[Back to index](#index)
 
 ### A case study: UCLA admittance
 
@@ -269,7 +269,7 @@ sprintf("The new prediction is %0.2f%%", 100*b_acc)
 
 We see a modest but positive improvement over the original model.
 
-[Back to index][Index]
+[Back to index](#index)
 
 ## Bootstrapping residuals: robust regression with Rcpp
 
@@ -339,7 +339,7 @@ Rcpp::List bootstrap_rlm(
 ```
 
 
-[Back to index][Index]
+[Back to index](#index)
 
 ### Case study: stackloss
 
@@ -417,7 +417,7 @@ data_frame(
 
 The results are indeed pretty similar! We get somewhat wider standard errors, but in the same order of magnitude. 
 
-[Back to index][Index]
+[Back to index](#index)
 
 ### Test files
 
@@ -441,4 +441,4 @@ test_that("rlm", {
 ```
 
 
-[Back to index][Index]
+[Back to index](#index)
