@@ -1,50 +1,51 @@
-# Yet Another RStudio Application
+## YARA: Yet another RStudio (internship) application
 
-It all starts with a story... Below is the live tale behind the code in this repository.
+--------------
 
-## Getting ready
 
-First some enthusiasism in our first commit.
+![](Images/hello.jpg)
 
-![](Images/getting_ready.png)
+-----
 
-I have a few ideas, I hope you like them!
+***It all starts with a story...***  My love story with R began during college as I learned from my mentor and friend, Ernesto Barrios. Besides being a Probability Professor at my university, he was an advocate of R who spent his energy promoting the use of R in Mexico. With him, I participated in local conferences endorsing R and embraced it as a companion and friend throughout my academic life.  I probably have RStudio running on my computer at least 350 days a year.
 
-* I love the *bootstrap* technique;  I used to teach computational statistics at ITAM, and now I'm a PhD student at UT Austin with interest statistical methods for complex data. I want to do something simple but elegant and illustrative:
-* Let's follow Davidson and Hinkley and design a function for (parametric) bootstrap robust simple linear regression (beginning of ch. 6).
-* I will use `Rcpp` for speed. In fact, I'll use `RcppArmadillo` because it's very easy to implement.
-* Let's make this a package! It should be easy with `devtools` and `roxygen2`. I discovered unit testing not long ago, but ever since my life is different; for this, I will use `testthat`.
+Joining the RStudio team is not something I would do for money or for prestige, but for the admiration that I feel towards the team, whose goals I share. RStudio is keeping R up-to-date for Data Science, bringing the best tools from the data science and computer science world, but at the same time, maintaining R's unique flavor and philosophy: friendly to the academic thinking and functional way of thinking. I prepared this special repository instead of a cover letter, I really hope you like it. I am very proud myself because it's simple yet powerful, and I'm using mostly the tools you guys created at RStudio.
 
-More ideas:
+-----
 
-* Everything should work smoothly within the `tidyverse` workflow.
-* I will visualize the results with `ggplot2`! There is nothing as great as ggplot out there, every other library becomes tedious when it comes to plotting statistical data (especially the Python ones...).
-* Creating git branches is kind of boring when you are the only user.. but let's do this anyway. I will add features progressively and keep track using continuous integration with `Travis CI` and `Codecov`.
-* Oh, by the way, this README is an `rmarkdown`.
 
-Let's get started!
 
-## Continuous integration and unit testing
+I have a few ideas for this repository...
+
+![](Images/thinking.jpg)
+
+* As a statistician, I have to love *bootstraping*. I gained some experience when I lectured a course in Computational Statistics at ITAM, and now as PhD student at UT Austin. I want to do something simple but elegant and illustrative. 
+* We'll see a basic light general-purpose bootstrapping framework, to show how it works in the heart. 
+* To show the power of `Rcpp` for speed, we'll also do a Bootstrap regression (case-based and parametric) with `RcppArmadillo`. I will more less follow the ideas in Davidson and Hinkley (ch. 6), as suggested in the internship description.
+* Let's make this a package! It should be easy with `devtools` and `roxygen2`. I thought making packages was hard until I discovered this; ever since I try to share the word!.
+* Unit testing is fundamental is this is to emulate a proper package! Let's use `testthat` for this goal.
+* I'll work with Github as realistic as possible. Also, I will set-up continuous integration with Travis CI and coverage with Codevov. Again using the great tools for this that available that RStudio is designing.
+* I want to use harness the power of the `tidyverse` workflow: my code relies at least on `readr`, `dplyr`, `tidy` and `purrr`.
+* Of course, we'll use `ggplot2` to visualize our results.
+* This entire README is being written with `rmarkdown`: results are shown as they come out.
 
 ![](Images/creating_package.png)
 
-If you want to install this package and test it in your computer just run
+If you want to run the examples I show in here, you can install the package with:
 
 ```r
 devtools::install_github('mauriciogtec/YetAnotherRStudioApplication')
 ```
 
-*Note*: All docuemntation will be created with roxygen directives and the function `devtools::document()`. 
+Let's get started!
 
-## Configuration of Travis CI and Codecov with `covr` and testthat.
+### Setting-up Travis CI, unit testing, and Codecov
 
-To make sure all releases work just fine (especially since Rcpp needs to be built). I will register the repository in Travis CI and Codecov. I am excited, `travis_integration` and `tests` will be the frist branches. And...
+Creating the `.travis.yml` will be my first branch, exciting. You can check my branches to get an idea of the steps I followed to build up this repository... There's another branch for `testthat` and Codecov.
 
-Great news! Our first merge! From now on I won't talk about git branches We'll just believe I'll continue working the right way. 
+I know.. I won't talk about git branches anymore... 
 
-![](Images/continuous_integration.png)
-
-Here are my precious banners:
+Here are my beautiful banners:
 
 ---
 
@@ -53,10 +54,10 @@ Here are my precious banners:
 
 ---
 
-![](Images/banners.png)
+![](Images/uphere.jpg)
 
 
-##  A light bootstrap library
+###  A light library for boostrap
 
 I don't pretend to do anything as powerful as `rsample`. In fact, I wanna show my elementary approach to bootstrapping with a very simple example. Thanks to the `tidyverse` machinery we can hove something up and running in no time.
 
@@ -65,31 +66,36 @@ I'll use the following libraries
 
 
 ```r
-library(YetAnotherRStudioApplication) # my functions defined below that come with this package
+library(YetAnotherRStudioApplication) # this package
 library(tidyverse)
 library(ggplot2)
 library(gridExtra)
-library(knitr)
 ```
 
 
-The light-weight example library will have three basic R functions
-- *constructor*: creates a bootstrap resample by resampling indices with replacement
-- *indexing*: defines a bracket notation to simplify indexing
-- *mapping*: applies a function to each resample. It is exploiting the power of `purrr` to make it versatile. Here they are
+The light-weight example library will have three basic R functions that complete the following tasks
+
+- *construction*: creates the resamples by creating an object that stores the original data and a list of indexes
+- *indexing*: defines a bracket notation that simplifies accesing resamples
+- *mapping*: bootstrap is all about applying functions to each resample. We will exploit the power of `purrr` 
+
+  *Note*: The documentation is generated using roxygen directives and `devtools::document()`
+
+This function are defined in the file `R/bootstrap.R`. I include them here for story-telling purposes.
 
 
 ```r
 #' @title light bootstrap constructor
 #' @description creates resampling indices but does not make entire copies of the dataset
-#' @param d a data.frame, tibble or matrix 
+#' @param d a data.frame or matrix 
 #' @export
 bootstrap <- function(data, times = 50L) {
   # Validate input
   !inherits(data, c("data.frame", "matrix")) && stop("d must be a data frame or numeric matrix")
+  
   # Create samples for the most basic bootstrap scheme
   idx <- replicate(times, sample(nrow(data), replace = TRUE), simplify = FALSE)
-  names(idx) <- paste0("sample", 1:times)
+  
   # Output boot_light object
   # new("bootstrap_light", data = data, indices = idx, times = as.integer(times))
   x <- list(data = data, idx = idx, times = as.integer(times))
@@ -114,13 +120,17 @@ bootstrap_map <- function(x, .f, times = 50L) {
   # Validate input
   !inherits(x, c("bootstrap")) && stop("x must be of class bootstrap")
   !inherits(.f, c("function", "formula")) && stop(".f must be a function or formula")
+  
   # Create samples for the most basic bootstrap scheme
-  .f <- purrr:::as_mapper(.f)
+  .f <- purrr:::as_mapper(.f) # code piracy, but magical
   purrr::map(1:x$times, function(i) .f(x[i]))
 }
 ```
 
-Now let's take a look at the example data I will use. Our task is to predict the admittance of a student into a UCLA program, based on their application features. We will use a logistic regression to exemplify the bootstrap approach, which in this case will be naive and resample the cases.
+### A case study: UCLA admittance
+
+Our task is to predict the admittance of a student into a UCLA program, based on their application features. We will use a logistic regression. We'll be crude in the sense that we will resample each case and run a new regression each time. In the next section there is a perhaps more efficient method, but model-based instead of non-parametric. To make this more interesting, I will alter introduce a noisy outlier in the data later.
+
 
 
 ```r
@@ -142,7 +152,7 @@ head(data)
 ## 6      1   760  3.00      2
 ```
 
-The following scatter diagram shows that there seems to be an association between higher gre's and acceptance. The effect of the GPA is less clear to me (we notice how `ggplot` makes it easy to compare by fixing the plotting limits accross subplots: `ggplot` is great!).
+The following scatter diagram shows that there seems to be an association between higher `gre` and acceptance. The effect of the `gpa` is less clear to me (we notice how `ggplot2` makes it easy to compare by fixing the plotting limits accross subplots: it is great!).
 
 
 ```r
@@ -153,14 +163,14 @@ ggplot(data, aes(x = gre, y = gpa)) +
 
 ![](README_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
-Now what I'm gonna do is ***cheat and create a bad mess*** by introducing an outlier. We want to see how the bootstrap will be stand superior to the simple model.
+Now what I'm gonna do is ***cheat and introduce an outlier***. We want to see how the bootstrap will be stand resistant but the simple model won't.
+
 
 ```r
 data$gpa[1] <- 40.0
 ```
 
-
-Of course we want to use bootstrap, but let us quickly first show the results of a logistic regression (measured in terms of prediction).
+Let's first check what the direct model obtains.
 
 
 ```r
@@ -177,7 +187,8 @@ original_coeffs
 ## -1.600576455
 ```
 
-Prediction accuracy
+We can test the prediction accuracy
+
 
 ```r
 pred <- round(fitted.values(mod, data))
@@ -188,7 +199,7 @@ sprintf("Original model accuracy is %0.2f%%", 100*sum(pred == data$admit) / nrow
 ## [1] "Original model accuracy is 69.50%"
 ```
 
-We'll now *create our bootstrap samples*!!
+***Let's now create bootstrap samples!***
 
 
 ```r
@@ -204,7 +215,7 @@ system.time({
 ##    0.02    0.00    0.02
 ```
 
-Evidently, the new object doesn't grow in size proportionally to the number of resamples, since only a indices are being created. For 1000 resamples, the growth factor in this dataset is
+Evidently, the new object doesn't grow in size proportionally to the number of resamples, since only indices are being stored. For our 1000 resamples, the growth factor in size for the bootsrapped dataset is
 
 
 ```r
@@ -212,26 +223,26 @@ as.numeric(object.size(b_resamples) / object.size(data))
 ```
 
 ```
-## [1] 169.5811
+## [1] 163.274
 ```
 
-Let's now run a regression model for each resample:
+We now run a regression model for each resample:
 
 
 ```r
 system.time({
-  b_models <- bootstrap_map(b_resamples, 
-    ~glm(admit ~ ., data = .x, family = "binomial")
-  )
+b_models <- bootstrap_map(b_resamples, 
+  ~glm(admit ~ ., data = .x, family = "binomial")
+)
 })
 ```
 
 ```
 ##    user  system elapsed 
-##    4.30    0.02    4.33
+##    4.27    0.03    4.30
 ```
  
-Let's start by comparing the coefficients of the model. We can use `purrr::map` and `purrr::reduce` to collect the bootstraps.
+Super fast, at least for this toy example. Let's now comparr the coefficients of the single model and the bootstrapped one. We can use `purrr::map` and `purrr::reduce` to collect the bootstraps estimates.
 
 
 ```r
@@ -270,7 +281,7 @@ marrangeGrob(plots, 3, 2, top = NULL)
 
 ![](README_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
 
-We can obtained improved model estimates and standard errors, comparing the original estimates (note: the original estimates given by the summary are in fact an approximation based on the model assumptions--the bootstrap version is not)
+We can obtained improved model estimates and standard errors:
 
 
 ```r
@@ -280,7 +291,6 @@ new_sd <- b_coefs %>%
   apply(2, sd)
 ```
 
-Compare result
 
 ```r
 data_frame(
@@ -303,9 +313,9 @@ data_frame(
 ## 6     -1.600576455      -1.616685610   0.415043455    0.444447026
 ```
 
-If we compare with the original estimates for the mean and standard deviation of the coefficient, they are completely different, especially in `gpa`, where we had our sneaky outlier. This is the main contribution of bootstrap! We have an entire distribution of the estimators, and much better sense of their uncertainty!
+What we expected happened! The sneaky new outlier messed the original coefficient of `gpa`. In fact, it gave a very bad estimate of its actual standard error. The bootstrapped did a very good job here. I leave it to you to check that bootstraps estimates are actually pretty close to ones we would have had without the outlier.
 
-Let's now compare predictions by selecting the prediction for each individual in each bootstrapped model. The final final decision is taken by averaging.
+Let's now compare predictions by selecting the fitted value for each individual in each bootstrapped model. 
 
 
 ```r
@@ -322,11 +332,13 @@ sprintf("The new prediction is %0.2f%%", 100*b_acc)
 ## [1] "The new prediction is 70.50%"
 ```
 
-It's a very modest yet positive improvement over the original model.
+We see a modest but positive improvement over the original model.
 
-## Bootstrapping residuals for robust regression with Rcpp
+## Bootstrapping residuals: robust regression with Rcpp
 
-Just to finish this presentation. I will show an approach for bootstrapping regression by resampling from the errors. This time I will create a single `rcpp` function to do the entire job. There's of course many rooms of improvement, including the resampling schme and need to integrate it the previous framework. But it is a nice ilustration of the power of Rcpp and the bootstrapping method.
+To finish with the cherry in top of the cake. I want to show an approach for bootstrapping regression by resampling from the errors. This time I will create a single `rcpp` function to do the entire job (just for convenience). There are is, of course, a big room for improvement, yet it is super fast, functional and illustrates the idea.
+
+This code is automaticcaly compiled when installing the package and it's included in the file `src/bootstrap.cpp`:
 
 
 ```cpp
@@ -390,14 +402,18 @@ Rcpp::List bootstrap_rlm(
 }
 ```
 
-Let's see an example with a commin R dataset. We will compare with `rlm` from the `MASS` package.
+
+### Case study: stackloss
+
+The `stackloss` dataset is used in the `MASS` documentation to show their robust linear regression model. Without going into much detail of the data, we will compare their `rlm` function with ours.
 
 
 ```r
 library(MASS)
-library(tidyverse)
 ```
-We want to predict the varible `stackloss` in the following data set
+
+Our goal is to predict the variable `stack.loss` using regression:
+
 
 ```r
 data("stackloss")
@@ -419,6 +435,8 @@ head(stackloss)
 ## 5       62         22         87         18
 ## 6       62         23         87         18
 ```
+
+Here's the `rlm` function from `MASS` as reference
 
 
 ```r
@@ -443,13 +461,13 @@ summary(mod)
 ## Residual standard error: 2.441 on 17 degrees of freedom
 ```
 
-Now with our bootstrap fast function
+Now we apply our fast model-based bootstrap function
 
 
 ```r
-n_bootstraps <- 500
+n_bootstraps <- 1000L
 system.time({
-  bmod <- bootstrap_rlm(X, y, n_bootstraps)
+bmod <- bootstrap_rlm(X, y, n_bootstraps)
 })
 ```
 
@@ -457,6 +475,8 @@ system.time({
 ##    user  system elapsed 
 ##       0       0       0
 ```
+
+We take a look at our bootstrapped coefficients:
 
 
 ```r
@@ -467,16 +487,16 @@ head(b_coefs)
 ```
 
 ```
-##   (Intercept)  Air.Flow Water.Temp  Acid.Conc.
-## 1   -24.44819 0.7375493  0.7495571 -0.21175602
-## 2   -41.84243 0.6908591  1.1156701 -0.07819247
-## 3   -28.48329 0.5902179  1.7330503 -0.29060013
-## 4   -28.67865 0.7924143  1.5951254 -0.41331084
-## 5   -56.67033 0.6224599  1.6812031  0.02500631
-## 6   -38.44470 0.6848814  1.5815338 -0.22045073
+##   (Intercept)  Air.Flow Water.Temp   Acid.Conc.
+## 1   -53.90290 0.7353436   1.318930 -0.008387299
+## 2   -25.82611 0.8267878   1.592261 -0.471921201
+## 3   -39.37272 0.5491726   1.667219 -0.145573460
+## 4   -48.37965 0.5341046   1.718499 -0.049025809
+## 5   -60.81299 0.6485176   1.639120  0.050182989
+## 6   -20.87667 0.8992886   1.387058 -0.506553478
 ```
 
-We can now compare the distribution we get from our model with the `rlm` function in `MASS`, which is shown in red.
+Let's now compare results. We show a histogram of our resamples and the `rlm`'s estimates with red lines.
 
 
 ```r
@@ -493,7 +513,6 @@ marrangeGrob(plots, 2, 2, top = NULL)
 
 ![](README_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
 
-Let's compare mean and errors of the models
 
 
 ```r
@@ -513,9 +532,9 @@ data_frame(
 ## # A tibble: 4 x 4
 ##   `MASS rlm coefs` `bootstrap coefs` `MASS rlm sd.` `bootstrap sd`
 ##              <dbl>             <dbl>          <dbl>          <dbl>
-## 1      -41.0265311       -39.8961064      9.8073472     11.1692938
-## 2        0.8293739         0.6966468      0.1111803      0.1381313
-## 3        0.9261082         1.3324419      0.3034081      0.3816058
-## 4       -0.1278492        -0.1480145      0.1288526      0.1536385
+## 1      -41.0265311       -39.8924478      9.8073472     12.1235470
+## 2        0.8293739         0.7103344      0.1111803      0.1368725
+## 3        0.9261082         1.3084099      0.3034081      0.3765079
+## 4       -0.1278492        -0.1518243      0.1288526      0.1632132
 ```
 

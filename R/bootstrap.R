@@ -5,9 +5,10 @@
 bootstrap <- function(data, times = 50L) {
   # Validate input
   !inherits(data, c("data.frame", "matrix")) && stop("d must be a data frame or numeric matrix")
+  
   # Create samples for the most basic bootstrap scheme
   idx <- replicate(times, sample(nrow(data), replace = TRUE), simplify = FALSE)
-  names(idx) <- paste0("sample", 1:times)
+
   # Output boot_light object
   # new("bootstrap_light", data = data, indices = idx, times = as.integer(times))
   x <- list(data = data, idx = idx, times = as.integer(times))
@@ -32,6 +33,7 @@ bootstrap_map <- function(x, .f, times = 50L) {
   # Validate input
   !inherits(x, c("bootstrap")) && stop("x must be of class bootstrap")
   !inherits(.f, c("function", "formula")) && stop(".f must be a function or formula")
+  
   # Create samples for the most basic bootstrap scheme
   .f <- purrr:::as_mapper(.f)
   purrr::map(1:x$times, function(i) .f(x[i]))
