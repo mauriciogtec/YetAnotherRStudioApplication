@@ -7,31 +7,42 @@
 
 -----
 
-***It all starts with a story...***  My love story with R began during college as I learned from my mentor and friend, Ernesto Barrios. Besides being a Probability Professor at my university, he was an advocate of R who spent his energy promoting the use of R in Mexico. With him, I participated in local conferences endorsing R and embraced it as a companion and friend throughout my academic life.  I probably have RStudio running on my computer at least 350 days a year.
+***It all starts with a story...***  My love story with R began during college as I learned from my mentor and friend, Ernesto Barrios. Besides being a Probability Professor at my university, he was an advocate of R who spent his energy promoting the use of R in Mexico. With him, I participated in local conferences endorsing R and embraced it as a companion throughout my academic life. I should have RStudio running on my computer at least 350 days a year! 
 
-Joining the RStudio team is not something I would do for money or for prestige, but for the admiration that I feel towards the team, whose goals I share. RStudio is keeping R up-to-date for Data Science, bringing the best tools from the data science and computer science world, but at the same time, maintaining R's unique flavor and philosophy: friendly to the academic thinking and functional way of thinking. I prepared this special repository instead of a cover letter, I really hope you like it. I am very proud myself because it's simple yet powerful, and I'm using mostly the tools you guys created at RStudio.
+RStudio is making R great and unique for Data Science, while maintaining its unique flavor and philosophy: friendly to the academic and functional way of thinking. I would really like to take the next step and start contributing to this amazing language, while learning from the best.
+
+I prepared this special repository instead of a cover letter; I hope you like it. I'm using mostly the tools you guys developed at RStudio.
+
+-----
+
+## Index
+
+1. [Ideas][A few ideas for this repository...]
+2. [Travis CI, unit testing, and Codecov][Setting-up Travis CI, unit testing, and Codecov]
+3. [A light library for bootstrapping][A light library for bootstrapping]
+4. [Case study: UCLA admittance][A case study: UCLA admittance]
+5. [Robust bootstrap regression with Rcpp][Bootstrapping residuals: robust regression with Rcpp]
+6. [Case study: stackloss][Case study: stackloss]
+7. [Test files][Test files]
 
 -----
 
 
-
-I have a few ideas for this repository...
+## A few ideas for this repository...
 
 ![](Images/thinking.jpg)
 
-* As a statistician, I have to love *bootstraping*. I gained some experience when I lectured a course in Computational Statistics at ITAM, and now as PhD student at UT Austin. I want to do something simple but elegant and illustrative. 
-* We'll see a basic light general-purpose bootstrapping framework, to show how it works in the heart. 
-* To show the power of `Rcpp` for speed, we'll also do a Bootstrap regression (case-based and parametric) with `RcppArmadillo`. I will more less follow the ideas in Davidson and Hinkley (ch. 6), as suggested in the internship description.
-* Let's make this a package! It should be easy with `devtools` and `roxygen2`. I thought making packages was hard until I discovered this; ever since I try to share the word!.
-* Unit testing is fundamental is this is to emulate a proper package! Let's use `testthat` for this goal.
-* I'll work with Github as realistic as possible. Also, I will set-up continuous integration with Travis CI and coverage with Codevov. Again using the great tools for this that available that RStudio is designing.
-* I want to use harness the power of the `tidyverse` workflow: my code relies at least on `readr`, `dplyr`, `tidy` and `purrr`.
+* As a statistician, I love *bootstraping*. I gained some experience when I lectured a course in Computational Statistics at ITAM, and now as PhD student at UT Austin. 
+* We'll develop a light general-purpose bootstrapping framework to illustrate the concept of bootstrapping and power of the `tidyverse` tools.
+* We'll also do a model-based Bootstrap regression with `RcppArmadillo`. I will more less follow the ideas in Davidson and Hinkley (ch. 6), as suggested in the internship description.
+* Let's make this a package using `devtools`! 
+* Now serious developing without unit testing! Let's use `testthat`.
+* I'll work with Github following the rules of version control, as much as my understanding allows me. Also, I will set-up continuous integration with Travis CI and coverage with Codevov. 
+* We'll use other `tidyverse` functions such as readr`, `dplyr`, `tidy` and `purrr`.
 * Of course, we'll use `ggplot2` to visualize our results.
-* This entire README is being written with `rmarkdown`: results are shown as they come out.
+* This entire README is being written with `rmarkdown`: no post-processing.
 
-![](Images/creating_package.png)
-
-If you want to run the examples I show in here, you can install the package with:
+If you want to run the examples I shown in this README, you can install the package with:
 
 ```r
 devtools::install_github('mauriciogtec/YetAnotherRStudioApplication')
@@ -39,13 +50,13 @@ devtools::install_github('mauriciogtec/YetAnotherRStudioApplication')
 
 Let's get started!
 
+[Back to index][Index]
+
 ### Setting-up Travis CI, unit testing, and Codecov
 
-Creating the `.travis.yml` will be my first branch, exciting. You can check my branches to get an idea of the steps I followed to build up this repository... There's another branch for `testthat` and Codecov.
+Creating the `.travis.yml` will be define my first branch: exciting. You can check my branches to get an idea of the steps I followed to build this repository... There's also a branch I used to integrate `testthat` and `covr`. I know.. I shouldn't mention git branches anymore... 
 
-I know.. I won't talk about git branches anymore... 
-
-Here are my beautiful banners:
+My precious:
 
 ---
 
@@ -57,7 +68,9 @@ Here are my beautiful banners:
 ![](Images/uphere.jpg)
 
 
-###  A light library for boostrap
+[Back to index][Index]
+
+###  A light library for bootstrapping
 
 I don't pretend to do anything as powerful as `rsample`. In fact, I wanna show my elementary approach to bootstrapping with a very simple example. Thanks to the `tidyverse` machinery we can hove something up and running in no time.
 
@@ -126,6 +139,8 @@ bootstrap_map <- function(x, .f, times = 50L) {
   purrr::map(1:x$times, function(i) .f(x[i]))
 }
 ```
+
+[Back to index][Index]
 
 ### A case study: UCLA admittance
 
@@ -212,7 +227,7 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##    0.02    0.00    0.02
+##    0.03    0.00    0.03
 ```
 
 Evidently, the new object doesn't grow in size proportionally to the number of resamples, since only indices are being stored. For our 1000 resamples, the growth factor in size for the bootsrapped dataset is
@@ -239,7 +254,7 @@ b_models <- bootstrap_map(b_resamples,
 
 ```
 ##    user  system elapsed 
-##    4.27    0.03    4.30
+##    4.39    0.06    4.45
 ```
  
 Super fast, at least for this toy example. Let's now comparr the coefficients of the single model and the bootstrapped one. We can use `purrr::map` and `purrr::reduce` to collect the bootstraps estimates.
@@ -334,6 +349,8 @@ sprintf("The new prediction is %0.2f%%", 100*b_acc)
 
 We see a modest but positive improvement over the original model.
 
+[Back to index][Index]
+
 ## Bootstrapping residuals: robust regression with Rcpp
 
 To finish with the cherry in top of the cake. I want to show an approach for bootstrapping regression by resampling from the errors. This time I will create a single `rcpp` function to do the entire job (just for convenience). There are is, of course, a big room for improvement, yet it is super fast, functional and illustrates the idea.
@@ -402,6 +419,8 @@ Rcpp::List bootstrap_rlm(
 }
 ```
 
+
+[Back to index][Index]
 
 ### Case study: stackloss
 
@@ -487,13 +506,13 @@ head(b_coefs)
 ```
 
 ```
-##   (Intercept)  Air.Flow Water.Temp   Acid.Conc.
-## 1   -53.90290 0.7353436   1.318930 -0.008387299
-## 2   -25.82611 0.8267878   1.592261 -0.471921201
-## 3   -39.37272 0.5491726   1.667219 -0.145573460
-## 4   -48.37965 0.5341046   1.718499 -0.049025809
-## 5   -60.81299 0.6485176   1.639120  0.050182989
-## 6   -20.87667 0.8992886   1.387058 -0.506553478
+##   (Intercept)  Air.Flow Water.Temp  Acid.Conc.
+## 1   -39.99730 0.8247604  1.4404729 -0.28103618
+## 2   -28.14672 0.6227701  2.0578232 -0.39736530
+## 3   -20.95254 0.8987623  1.0829062 -0.44187797
+## 4   -45.20598 0.7734870  0.8250585 -0.02500840
+## 5   -39.39274 0.7037804  1.2961675 -0.14372254
+## 6   -47.12738 0.6495056  1.4774469 -0.08120211
 ```
 
 Let's now compare results. We show a histogram of our resamples and the `rlm`'s estimates with red lines.
@@ -532,9 +551,36 @@ data_frame(
 ## # A tibble: 4 x 4
 ##   `MASS rlm coefs` `bootstrap coefs` `MASS rlm sd.` `bootstrap sd`
 ##              <dbl>             <dbl>          <dbl>          <dbl>
-## 1      -41.0265311       -39.8924478      9.8073472     12.1235470
-## 2        0.8293739         0.7103344      0.1111803      0.1368725
-## 3        0.9261082         1.3084099      0.3034081      0.3765079
-## 4       -0.1278492        -0.1518243      0.1288526      0.1632132
+## 1      -41.0265311       -40.1647615      9.8073472     12.2524227
+## 2        0.8293739         0.7175581      0.1111803      0.1378854
+## 3        0.9261082         1.2841564      0.3034081      0.3695472
+## 4       -0.1278492        -0.1479626      0.1288526      0.1553305
 ```
 
+The results are indeed pretty similar! We get somewhat wider standard errors, but in the same order of magnitude. 
+
+[Back to index][Index]
+
+### Test files
+
+The tests are included in the folder `tests/testhat/`. They are quite silly, but illustrate the testing framework.
+
+
+```r
+test_that("bootstrap", {
+  bset <- bootstrap(iris, 100)
+  expect_is(bset, "bootstrap")
+  expect_is(bootstrap_map(bset, nrow), "list")
+})
+
+test_that("rlm", {
+  X <- matrix(c(1,1,1, 4, 3, 1), nrow = 3)
+  y <- c(5.5, 3.5, 1.2)
+  mod <- bootstrap_rlm(X, y, 100)
+  expect_is(mod, "list")
+  expect_equal(names(mod), c("coefficients", "se", "residuals", "leverages", "modified residuals"))
+})
+```
+
+
+[Back to index][Index]

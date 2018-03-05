@@ -7,31 +7,42 @@
 
 -----
 
-***It all starts with a story...***  My love story with R began during college as I learned from my mentor and friend, Ernesto Barrios. Besides being a Probability Professor at my university, he was an advocate of R who spent his energy promoting the use of R in Mexico. With him, I participated in local conferences endorsing R and embraced it as a companion and friend throughout my academic life.  I probably have RStudio running on my computer at least 350 days a year.
+***It all starts with a story...***  My love story with R began during college as I learned from my mentor and friend, Ernesto Barrios. Besides being a Probability Professor at my university, he was an advocate of R who spent his energy promoting the use of R in Mexico. With him, I participated in local conferences endorsing R and embraced it as a companion throughout my academic life. I should have RStudio running on my computer at least 350 days a year! 
 
-Joining the RStudio team is not something I would do for money or for prestige, but for the admiration that I feel towards the team, whose goals I share. RStudio is keeping R up-to-date for Data Science, bringing the best tools from the data science and computer science world, but at the same time, maintaining R's unique flavor and philosophy: friendly to the academic thinking and functional way of thinking. I prepared this special repository instead of a cover letter, I really hope you like it. I am very proud myself because it's simple yet powerful, and I'm using mostly the tools you guys created at RStudio.
+RStudio is making R great and unique for Data Science, while maintaining its unique flavor and philosophy: friendly to the academic and functional way of thinking. I would really like to take the next step and start contributing to this amazing language, while learning from the best.
+
+I prepared this special repository instead of a cover letter; I hope you like it. I'm using mostly the tools you guys developed at RStudio.
+
+-----
+
+## Index
+
+1. [Ideas][A few ideas for this repository...]
+2. [Travis CI, unit testing, and Codecov][Setting-up Travis CI, unit testing, and Codecov]
+3. [A light library for bootstrapping][A light library for bootstrapping]
+4. [Case study: UCLA admittance][A case study: UCLA admittance]
+5. [Robust bootstrap regression with Rcpp][Bootstrapping residuals: robust regression with Rcpp]
+6. [Case study: stackloss][Case study: stackloss]
+7. [Test files][Test files]
 
 -----
 
 
-
-I have a few ideas for this repository...
+## A few ideas for this repository...
 
 ![](Images/thinking.jpg)
 
-* As a statistician, I have to love *bootstraping*. I gained some experience when I lectured a course in Computational Statistics at ITAM, and now as PhD student at UT Austin. I want to do something simple but elegant and illustrative. 
-* We'll see a basic light general-purpose bootstrapping framework, to show how it works in the heart. 
-* To show the power of `Rcpp` for speed, we'll also do a Bootstrap regression (case-based and parametric) with `RcppArmadillo`. I will more less follow the ideas in Davidson and Hinkley (ch. 6), as suggested in the internship description.
-* Let's make this a package! It should be easy with `devtools` and `roxygen2`. I thought making packages was hard until I discovered this; ever since I try to share the word!.
-* Unit testing is fundamental is this is to emulate a proper package! Let's use `testthat` for this goal.
-* I'll work with Github as realistic as possible. Also, I will set-up continuous integration with Travis CI and coverage with Codevov. Again using the great tools for this that available that RStudio is designing.
-* I want to use harness the power of the `tidyverse` workflow: my code relies at least on `readr`, `dplyr`, `tidy` and `purrr`.
+* As a statistician, I love *bootstraping*. I gained some experience when I lectured a course in Computational Statistics at ITAM, and now as PhD student at UT Austin. 
+* We'll develop a light general-purpose bootstrapping framework to illustrate the concept of bootstrapping and power of the `tidyverse` tools.
+* We'll also do a model-based Bootstrap regression with `RcppArmadillo`. I will more less follow the ideas in Davidson and Hinkley (ch. 6), as suggested in the internship description.
+* Let's make this a package using `devtools`! 
+* Now serious developing without unit testing! Let's use `testthat`.
+* I'll work with Github following the rules of version control, as much as my understanding allows me. Also, I will set-up continuous integration with Travis CI and coverage with Codevov. 
+* We'll use other `tidyverse` functions such as readr`, `dplyr`, `tidy` and `purrr`.
 * Of course, we'll use `ggplot2` to visualize our results.
-* This entire README is being written with `rmarkdown`: results are shown as they come out.
+* This entire README is being written with `rmarkdown`: no post-processing.
 
-![](Images/creating_package.png)
-
-If you want to run the examples I show in here, you can install the package with:
+If you want to run the examples I shown in this README, you can install the package with:
 
 ```r
 devtools::install_github('mauriciogtec/YetAnotherRStudioApplication')
@@ -39,13 +50,13 @@ devtools::install_github('mauriciogtec/YetAnotherRStudioApplication')
 
 Let's get started!
 
+[Back to index][Index]
+
 ### Setting-up Travis CI, unit testing, and Codecov
 
-Creating the `.travis.yml` will be my first branch, exciting. You can check my branches to get an idea of the steps I followed to build up this repository... There's another branch for `testthat` and Codecov.
+Creating the `.travis.yml` will be define my first branch: exciting. You can check my branches to get an idea of the steps I followed to build this repository... There's also a branch I used to integrate `testthat` and `covr`. I know.. I shouldn't mention git branches anymore... 
 
-I know.. I won't talk about git branches anymore... 
-
-Here are my beautiful banners:
+My precious:
 
 ---
 
@@ -57,14 +68,16 @@ Here are my beautiful banners:
 ![](Images/uphere.jpg)
 
 
-###  A light library for boostrap
+[Back to index][Index]
+
+###  A light library for bootstrapping
 
 I don't pretend to do anything as powerful as `rsample`. In fact, I wanna show my elementary approach to bootstrapping with a very simple example. Thanks to the `tidyverse` machinery we can hove something up and running in no time.
 
 I'll use the following libraries
 
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE,warning=FALSE}
 library(YetAnotherRStudioApplication) # this package
 library(tidyverse)
 library(ggplot2)
@@ -124,6 +137,8 @@ bootstrap_map <- function(x, .f, times = 50L) {
   purrr::map(1:x$times, function(i) .f(x[i]))
 }
 ```
+
+[Back to index][Index]
 
 ### A case study: UCLA admittance
 
@@ -254,6 +269,8 @@ sprintf("The new prediction is %0.2f%%", 100*b_acc)
 
 We see a modest but positive improvement over the original model.
 
+[Back to index][Index]
+
 ## Bootstrapping residuals: robust regression with Rcpp
 
 To finish with the cherry in top of the cake. I want to show an approach for bootstrapping regression by resampling from the errors. This time I will create a single `rcpp` function to do the entire job (just for convenience). There are is, of course, a big room for improvement, yet it is super fast, functional and illustrates the idea.
@@ -321,6 +338,8 @@ Rcpp::List bootstrap_rlm(
 }
 ```
 
+
+[Back to index][Index]
 
 ### Case study: stackloss
 
@@ -398,6 +417,28 @@ data_frame(
 
 The results are indeed pretty similar! We get somewhat wider standard errors, but in the same order of magnitude. 
 
+[Back to index][Index]
+
+### Test files
+
+The tests are included in the folder `tests/testhat/`. They are quite silly, but illustrate the testing framework.
+
+```{r, eval = FALSE}
+test_that("bootstrap", {
+  bset <- bootstrap(iris, 100)
+  expect_is(bset, "bootstrap")
+  expect_is(bootstrap_map(bset, nrow), "list")
+})
+
+test_that("rlm", {
+  X <- matrix(c(1,1,1, 4, 3, 1), nrow = 3)
+  y <- c(5.5, 3.5, 1.2)
+  mod <- bootstrap_rlm(X, y, 100)
+  expect_is(mod, "list")
+  expect_equal(names(mod), c("coefficients", "se", "residuals", "leverages", "modified residuals"))
+})
+
+```
 
 
-
+[Back to index][Index]
