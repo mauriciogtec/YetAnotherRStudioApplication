@@ -7,7 +7,7 @@
 
 -----
 
-***It all starts with a story...***  My love story with R began during college as I learned from my mentor and friend, Ernesto Barrios. Besides being a Probability Professor at my university, he was an advocate of R who spent his energy promoting the use of R in Mexico. With him, I participated in local conferences endorsing R and embraced it as a companion throughout my academic life. I should have RStudio running on my computer at least 350 days a year! 
+***It all starts with a story...***  My love story with R began during college as I learned from my mentor and friend, Ernesto Barrios. Besides being a Probability Professor at my university, he was an advocate of R who spent his energy promoting the use of R in Mexico. With him, I participated in local conferences endorsing R and embraced it as a companion throughout my academic life. RStudio is running on my computer around 350 days a year! 
 
 RStudio is making R great and unique for Data Science, while maintaining its unique flavor and philosophy: friendly to the academic and functional way of thinking. I would really like to take the next step and start contributing to this amazing language, while learning from the best.
 
@@ -19,8 +19,8 @@ I prepared this special repository instead of a cover letter; I hope you like it
 
 1. [Ideas](#a-few-ideas-for-this-repository)
 2. [Travis CI, unit testing, and Codecov](#setting-up-travis-ci-unit-testing-and-codecov)
-3. [A light library for bootstrapping](##a-light-library-for-bootstrapping)
-4. [Case study: UCLA admittance](#a-case-study-ucla-admittance)
+3. [A light library for bootstrapping](#a-light-library-for-bootstrapping)
+4. [Case study: UCLA admittance](#a-case-study-ucla-admittance): 4a. [Data description](#data-description), 4b. [Bootstrap regression](#bootstrap-regression)
 5. [Robust bootstrap regression with Rcpp](#bootstrapping-residuals-robust-regression-with-rcpp)
 6. [Case study: stackloss](#case-study-stackloss)
 7. [Test files](#test-files)
@@ -144,6 +144,9 @@ bootstrap_map <- function(x, .f, times = 50L) {
 
 ### A case study: UCLA admittance
 
+
+#### Data description
+
 Our task is to predict the admittance of a student into a UCLA program, based on their application features. We will use a logistic regression. We'll be crude in the sense that we will resample each case and run a new regression each time. In the next section there is a perhaps more efficient method, but model-based instead of non-parametric. To make this more interesting, I will alter introduce a noisy outlier in the data later.
 
 
@@ -214,7 +217,8 @@ sprintf("Original model accuracy is %0.2f%%", 100*sum(pred == data$admit) / nrow
 ## [1] "Original model accuracy is 69.50%"
 ```
 
-***Let's now create bootstrap samples!***
+
+#### Bootstrap regression
 
 
 ```r
@@ -227,7 +231,7 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##    0.02    0.00    0.02
+##    0.01    0.00    0.01
 ```
 
 Evidently, the new object doesn't grow in size proportionally to the number of resamples, since only indices are being stored. For our 1000 resamples, the growth factor in size for the bootsrapped dataset is
@@ -254,7 +258,7 @@ b_models <- bootstrap_map(b_resamples,
 
 ```
 ##    user  system elapsed 
-##    4.20    0.02    4.24
+##    4.33    0.01    4.34
 ```
  
 Super fast, at least for this toy example. Let's now comparr the coefficients of the single model and the bootstrapped one. We can use `purrr::map` and `purrr::reduce` to collect the bootstraps estimates.
@@ -264,6 +268,17 @@ Super fast, at least for this toy example. Let's now comparr the coefficients of
 b_coefs <- b_models %>% 
   map(~coefficients(.x)) %>% 
   reduce(rbind) 
+head(b_coefs)
+```
+
+```
+##     (Intercept)         gre         gpa      rank2      rank3      rank4
+## out   -4.511865 0.005344810  0.30003262 -0.5696660 -1.1065630 -0.9821304
+##       -2.404639 0.001229168  0.47355823 -0.5137163 -0.9470205 -1.9758657
+##       -5.390074 0.001913244  1.19380980 -0.5098294 -1.3576655 -0.8919793
+##       -1.210839 0.002856016 -0.03884109 -0.5992366 -1.1658515 -1.5303137
+##       -1.749546 0.003301922 -0.01040913 -0.5216761 -1.1270442 -1.7701525
+##       -2.258941 0.001309921  0.50855410 -0.9218762 -1.2461990 -1.7115325
 ```
 
 
@@ -296,7 +311,7 @@ marrangeGrob(plots, 3, 2, top = NULL)
 
 ![](README_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
 
-We can obtained improved model estimates and standard errors:
+We can obtain improved model estimates and standard errors:
 
 
 ```r
@@ -507,12 +522,12 @@ head(b_coefs)
 
 ```
 ##   (Intercept)  Air.Flow Water.Temp  Acid.Conc.
-## 1   -51.75230 0.5915101   1.774675 -0.04907255
-## 2   -62.98293 0.7781718   1.167115  0.10105416
-## 3   -37.53804 0.6955403   1.299098 -0.17379812
-## 4   -66.52950 0.7701869   1.196422  0.15486187
-## 5   -67.86527 0.7117448   1.420694  0.14018912
-## 6   -38.70231 0.6708130   1.659460 -0.20101446
+## 1   -46.97376 0.8487729  1.1017479 -0.11391230
+## 2   -32.83021 0.7339996  1.3671844 -0.27535472
+## 3   -37.34729 0.8343003  1.1991966 -0.25540121
+## 4   -32.71125 0.6752006  1.2667073 -0.19392791
+## 5   -46.46469 0.7844634  1.1818792 -0.08607134
+## 6   -46.86391 0.9670811  0.8455293 -0.12741050
 ```
 
 Let's now compare results. We show a histogram of our resamples and the `rlm`'s estimates with red lines.
@@ -551,10 +566,10 @@ data_frame(
 ## # A tibble: 4 x 4
 ##   `MASS rlm coefs` `bootstrap coefs` `MASS rlm sd.` `bootstrap sd`
 ##              <dbl>             <dbl>          <dbl>          <dbl>
-## 1      -41.0265311       -39.8686725      9.8073472     12.1195915
-## 2        0.8293739         0.7107926      0.1111803      0.1390344
-## 3        0.9261082         1.3035074      0.3034081      0.3749820
-## 4       -0.1278492        -0.1514588      0.1288526      0.1572396
+## 1      -41.0265311       -39.7198211      9.8073472     12.3464616
+## 2        0.8293739         0.7144741      0.1111803      0.1352044
+## 3        0.9261082         1.2978771      0.3034081      0.3737344
+## 4       -0.1278492        -0.1539953      0.1288526      0.1565190
 ```
 
 The results are indeed pretty similar! We get somewhat wider standard errors, but in the same order of magnitude. 

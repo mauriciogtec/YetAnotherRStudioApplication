@@ -7,7 +7,7 @@
 
 -----
 
-***It all starts with a story...***  My love story with R began during college as I learned from my mentor and friend, Ernesto Barrios. Besides being a Probability Professor at my university, he was an advocate of R who spent his energy promoting the use of R in Mexico. With him, I participated in local conferences endorsing R and embraced it as a companion throughout my academic life. I should have RStudio running on my computer at least 350 days a year! 
+***It all starts with a story...***  My love story with R began during college as I learned from my mentor and friend, Ernesto Barrios. Besides being a Probability Professor at my university, he was an advocate of R who spent his energy promoting the use of R in Mexico. With him, I participated in local conferences endorsing R and embraced it as a companion throughout my academic life. RStudio is running on my computer around 350 days a year! 
 
 RStudio is making R great and unique for Data Science, while maintaining its unique flavor and philosophy: friendly to the academic and functional way of thinking. I would really like to take the next step and start contributing to this amazing language, while learning from the best.
 
@@ -19,8 +19,8 @@ I prepared this special repository instead of a cover letter; I hope you like it
 
 1. [Ideas](#a-few-ideas-for-this-repository)
 2. [Travis CI, unit testing, and Codecov](#setting-up-travis-ci-unit-testing-and-codecov)
-3. [A light library for bootstrapping](##a-light-library-for-bootstrapping)
-4. [Case study: UCLA admittance](#a-case-study-ucla-admittance)
+3. [A light library for bootstrapping](#a-light-library-for-bootstrapping)
+4. [Case study: UCLA admittance](#a-case-study-ucla-admittance): 4a. [Data description](#data-description), 4b. [Bootstrap regression](#bootstrap-regression)
 5. [Robust bootstrap regression with Rcpp](#bootstrapping-residuals-robust-regression-with-rcpp)
 6. [Case study: stackloss](#case-study-stackloss)
 7. [Test files](#test-files)
@@ -142,6 +142,9 @@ bootstrap_map <- function(x, .f, times = 50L) {
 
 ### A case study: UCLA admittance
 
+
+#### Data description
+
 Our task is to predict the admittance of a student into a UCLA program, based on their application features. We will use a logistic regression. We'll be crude in the sense that we will resample each case and run a new regression each time. In the next section there is a perhaps more efficient method, but model-based instead of non-parametric. To make this more interesting, I will alter introduce a noisy outlier in the data later.
 
 
@@ -182,7 +185,8 @@ pred <- round(fitted.values(mod, data))
 sprintf("Original model accuracy is %0.2f%%", 100*sum(pred == data$admit) / nrow(data))
 ```
 
-***Let's now create bootstrap samples!***
+
+#### Bootstrap regression
 
 ```{r}
 set.seed(999)
@@ -214,6 +218,7 @@ Super fast, at least for this toy example. Let's now comparr the coefficients of
 b_coefs <- b_models %>% 
   map(~coefficients(.x)) %>% 
   reduce(rbind) 
+head(b_coefs)
 ```
 
 ```{r}
@@ -235,7 +240,7 @@ plots <- b_coefs %>%
 marrangeGrob(plots, 3, 2, top = NULL)
 ```
 
-We can obtained improved model estimates and standard errors:
+We can obtain improved model estimates and standard errors:
 
 ```{r}
 new_coef <- b_coefs %>% 
